@@ -853,13 +853,31 @@ class Referee {
     }
 
     public Referee(InputStream is, PrintStream out, PrintStream err) throws IOException {
-	initReferee(2, new Properties());
-
 	Scanner in = new Scanner(is);
 	
 	try {
-	    // Read ###Start 2
-	    in.nextLine();
+		Properties prop = new Properties();
+
+		{
+			String line = in.nextLine();
+
+			// Check if the line is ###Seed n
+			if (line.startsWith("###Seed ")) {
+				var seed = line.substring("###Seed ".length());
+				prop.setProperty("seed", seed);
+				line = in.nextLine();
+			}
+
+			// Ensure the line is ###Start 2
+			if (!line.equals("###Start 2")) {
+				out.println("###Error line wasn't a start command!");
+				err.println("Read line wasn't a start command!");
+				System.exit(1);
+				return;
+			}
+		}
+
+		initReferee(2, prop);
 	    
 	    out.println("###Input 0");
 	    for (String line : getInitInputForPlayer(0)) {
